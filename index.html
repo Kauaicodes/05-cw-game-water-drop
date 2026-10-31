@@ -14,6 +14,14 @@
         <div class="score-panel">
             <div class="score">Score: <span id="score" aria-live="polite">0</span></div>
             <div class="timer">Time: <span id="time">30</span>s</div>
+            <label class="difficulty-control" for="difficulty">
+                Difficulty:
+                <select id="difficulty">
+                    <option value="easy">Easy</option>
+                    <option value="normal" selected>Normal</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </label>
             <div class="game-actions">
                 <button id="start-btn">Start Game</button>
                 <button id="reset-btn" type="button">Reset</button>
@@ -21,6 +29,10 @@
         </div>
         <p id="game-message" aria-live="polite">Press Start Game when you're ready.</p>
         <div id="game-container" role="group" aria-label="Falling water drops game area"></div>
+        <footer class="game-footer">
+            <a href="https://www.charitywater.org/">Visit charity: water</a>
+            <a href="https://www.charitywater.org/donate">Donate</a>
+        </footer>
     </div>
     
     <script src="script.js"></script>

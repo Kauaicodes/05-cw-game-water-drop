@@ -23,12 +23,20 @@ Fonts:
     --cw-blue: #2e9df7;
     --cw-charcoal: #131313;
     --cw-water-bg: #e6f7ff;
+    --cw-font-family: "Proxima Nova", Avenir, sans-serif;
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
 }
 
 body {
@@ -39,7 +47,7 @@ body {
     padding: 24px 12px;
     background-color: #fff;
     color: var(--cw-charcoal);
-    font-family: "Proxima Nova", Avenir, "Avenir Next", sans-serif;
+    font-family: var(--cw-font-family);
 }
 
 .game-wrapper {
@@ -75,6 +83,27 @@ body {
     font-weight: bold;
 }
 
+.difficulty-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: bold;
+}
+
+#difficulty {
+    min-height: 38px;
+    padding: 6px 8px;
+    border: 1px solid var(--cw-charcoal);
+    border-radius: 4px;
+    background-color: #fff;
+    color: var(--cw-charcoal);
+    font: inherit;
+}
+
+#difficulty:disabled {
+    opacity: 0.7;
+}
+
 #game-container {
     width: min(800px, 92vw, calc(65vh * 4 / 3));
     aspect-ratio: 4 / 3;
@@ -97,6 +126,7 @@ body {
     flex: 0 0 auto;
     min-height: 42px;
     padding: 8px 14px;
+    font-family: inherit;
     color: var(--cw-charcoal);
     border-radius: 4px;
     cursor: pointer;
@@ -182,6 +212,22 @@ body {
     text-align: center;
 }
 
+.game-footer {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    padding: 12px 0;
+    border-top: 1px solid var(--cw-blue);
+}
+
+.game-footer a {
+    color: var(--cw-charcoal);
+    font-weight: bold;
+    text-decoration-color: var(--cw-blue);
+    text-underline-offset: 3px;
+}
+
 .score-pop {
     animation: scorePop 220ms ease-out;
 }
@@ -251,7 +297,8 @@ body {
     }
 
     .score,
-    .timer {
+    .timer,
+    .difficulty-control {
         font-size: 18px;
     }
 

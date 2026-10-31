@@ -3,13 +3,17 @@ const scoreDisplay = document.getElementById("score");
 const timeDisplay = document.getElementById("time");
 const startButton = document.getElementById("start-btn");
 const resetButton = document.getElementById("reset-btn");
+const difficultySelect = document.getElementById("difficulty");
 const gameMessage = document.getElementById("game-message");
 let gameRunning = false;
 let dropMaker;
 let countdown;
 let score = 0;
 let timeLeft = 30;
+let audioContext;
+const gameOverAudio = new Audio("sounds.MP3%20File/alphix-game-over-417465.mp3");
 const activeLanes = new Set();
+const fallDurations = { easy: "5s", normal: "4s", hard: "3s" };
 
 const winningMessages = [
   "Amazing work! You collected enough clean drops!",
@@ -22,8 +26,14 @@ const losingMessages = [
   "So close! Give it another try.",
 ];
 
-startButton.addEventListener("click", startGame);
-resetButton.addEventListener("click", resetGame);
+startButton.addEventListener("click", () => {
+  playSound("click");
+  startGame();
+});
+resetButton.addEventListener("click", () => {
+  playSound("click");
+  resetGame();
+});
 
 function startGame() {
   if (gameRunning) return;
@@ -38,6 +48,7 @@ function startGame() {
   activeLanes.clear();
   startButton.disabled = true;
   startButton.textContent = "Game in progress";
+  difficultySelect.disabled = true;
 
   createDrop();
   dropMaker = setInterval(createDrop, 1000);
@@ -64,6 +75,7 @@ function resetGame() {
   gameMessage.textContent = "Game reset. Press Start Game when you're ready.";
   startButton.disabled = false;
   startButton.textContent = "Start Game";
+  difficultySelect.disabled = false;
 }
 
 function createDrop() {
@@ -92,7 +104,7 @@ function createDrop() {
   drop.style.height = `${size}px`;
   drop.style.left = `${xPosition}px`;
   drop.style.setProperty("--fall-distance", `${gameHeight + size}px`);
-  drop.style.animationDuration = "4s";
+  drop.style.animationDuration = fallDurations[difficultySelect.value];
 
   let collected = false;
   const removeDrop = () => {
@@ -110,6 +122,7 @@ function createDrop() {
     void scoreDisplay.parentElement.offsetWidth;
     scoreDisplay.parentElement.classList.add("score-pop");
     gameMessage.textContent = isBadDrop ? "Dirty drop! -1 point" : "Clean drop! +1 point";
+    playSound("collect");
     removeDrop();
   };
 
@@ -121,7 +134,10 @@ function createDrop() {
   drop.addEventListener("click", collectDrop);
 
   gameContainer.appendChild(drop);
-  drop.addEventListener("animationend", removeDrop);
+  drop.addEventListener("animationend", () => {
+    if (!collected && gameRunning) playSound("miss");
+    removeDrop();
+  });
 }
 
 function endGame() {
@@ -135,7 +151,47 @@ function endGame() {
   gameMessage.textContent = messages[Math.floor(Math.random() * messages.length)];
   startButton.disabled = false;
   startButton.textContent = "Play Again";
-  if (playerWon) showConfetti();
+  difficultySelect.disabled = false;
+  gameOverAudio.currentTime = 0;
+  gameOverAudio.play().catch(() => {});
+  if (playerWon) {
+    showConfetti();
+  }
+}
+
+function playSound(cue) {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return;
+
+  audioContext ??= new AudioContext();
+  if (audioContext.state === "suspended") audioContext.resume();
+
+  const cues = {
+    click: [560],
+    collect: [660, 880],
+    miss: [260, 180],
+    win: [660, 784, 988, 1318],
+  };
+  const frequencies = cues[cue];
+  const noteDuration = cue === "win" ? 0.14 : 0.08;
+  const startTime = audioContext.currentTime;
+
+  frequencies.forEach((frequency, index) => {
+    const oscillator = audioContext.createOscillator();
+    const volume = audioContext.createGain();
+    const noteStart = startTime + index * noteDuration;
+    const noteEnd = noteStart + noteDuration * 0.9;
+
+    oscillator.frequency.value = frequency;
+    oscillator.type = cue === "miss" ? "triangle" : "sine";
+    volume.gain.setValueAtTime(0.001, noteStart);
+    volume.gain.exponentialRampToValueAtTime(0.12, noteStart + 0.01);
+    volume.gain.exponentialRampToValueAtTime(0.001, noteEnd);
+    oscillator.connect(volume);
+    volume.connect(audioContext.destination);
+    oscillator.start(noteStart);
+    oscillator.stop(noteEnd);
+  });
 }
 
 function showConfetti() {
